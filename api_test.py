@@ -1,22 +1,15 @@
-import google.generativeai as genai
 
-# 🔑 Replace with your API key
-API_KEY = ""
+#API_KEY = "AIzaSyDMgfn0CCGL9c3Zb6LO6Gcxt2IIl3XR1Nc"
 
-# Configure API
-genai.configure(api_key=API_KEY)
+from google import genai
 
-try:
-    # Initialize model
-    model = genai.GenerativeModel("gemini-1.5-flash")
+# Initialize client
+client = genai.Client(api_key="AIzaSyDMgfn0CCGL9c3Zb6LO6Gcxt2IIl3XR1Nc")
 
-    # Send a simple test prompt
-    response = model.generate_content("Say 'API is working' if you can read this.")
+# Test prompt
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="Explain what RAG is in simple terms"
+)
 
-    # Print response
-    print("✅ API Response:")
-    print(response.text)
-
-except Exception as e:
-    print("❌ Error occurred:")
-    print(e)
+print(response.text)
