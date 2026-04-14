@@ -363,7 +363,7 @@
         }
     });
 
-    function setURL() {
+    async function setURL() {
         const urlInput = document.getElementById("url");
         const url = urlInput.value.trim();
 
@@ -373,27 +373,56 @@
             return;
         }
 
-        currentURL = url;
-        ready = true;
+        const indexBtn = document.getElementById("indexBtn");
+        const originalBtnText = indexBtn.innerText;
+        indexBtn.innerText = "Indexing...";
+        indexBtn.disabled = true;
 
-        // Update UI Status
-        document.getElementById("statusDot").classList.add("ready");
-        document.getElementById("statusText").innerText = "Ready to chat";
-        document.getElementById("statusText").style.color = "var(--text-primary)";
-        
-        // Enable inputs
-        const questionInput = document.getElementById("question");
-        questionInput.disabled = false;
-        document.getElementById("sendBtn").disabled = false;
-        
-        // Visual feedback on button
-        const btn = document.getElementById("indexBtn");
-        btn.innerText = "Indexed ✅";
-        btn.style.backgroundColor = "transparent";
-        btn.style.border = "1px solid var(--border-color)";
-        
-        addBotMessage(`Website set to: ${url}. What would you like to know?`);
-        questionInput.focus();
+        try {
+            // Call backend /build endpoint
+            const response = await fetch("http://127.0.0.1:8000/build", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Indexing failed");
+            }
+
+            currentURL = url;
+            ready = true;
+
+            // Update UI status
+            document.getElementById("statusDot").classList.add("ready");
+            document.getElementById("statusText").innerText = "Ready to chat";
+            document.getElementById("statusText").style.color = "var(--text-primary)";
+
+            // Enable chat inputs
+            const questionInput = document.getElementById("question");
+            questionInput.disabled = false;
+            document.getElementById("sendBtn").disabled = false;
+
+            // Visual feedback on button
+            indexBtn.innerText = "Indexed ✅";
+            indexBtn.style.backgroundColor = "transparent";
+            indexBtn.style.border = "1px solid var(--border-color)";
+
+            addBotMessage(`Indexed ${data.pages_crawled} pages (${data.chunks_created} chunks). You can now ask questions about: ${url}`);
+            questionInput.focus();
+
+        } catch (error) {
+            console.error("Indexing error:", error);
+            addBotMessage(`❌ Failed to index website: ${error.message}. Make sure the backend is running and the URL is accessible.`);
+            document.getElementById("statusDot").classList.remove("ready");
+            document.getElementById("statusText").innerText = "Indexing failed";
+            indexBtn.innerText = originalBtnText;
+            indexBtn.disabled = false;
+        } finally {
+            indexBtn.disabled = false;
+        }
     }
 
     function addUserMessage(text) {
