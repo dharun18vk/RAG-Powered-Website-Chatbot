@@ -8,3 +8,10 @@ google-generativeai
 
 
 #pip install fastapi uvicorn requests beautifulsoup4 sentence-transformers faiss-cpu numpy
+# python -m uvicorn chatbot:app --reload
+
+# pip install fastapi uvicorn requests beautifulsoup4
+# pip install playwright newspaper3k
+# pip install faiss-cpu sentence-transformers
+# python -m playwright install
+# pip install lxml_html_clean

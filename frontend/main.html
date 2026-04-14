@@ -3,350 +3,526 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Chatbot Prototype</title>
+    <title>AI Website Q&A</title>
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg-main: #F3F4F6;
-            --bg-panel: #FFFFFF;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --border: #E5E7EB;
-            --bot-bubble: #F3F4F6;
-            --user-bubble: #4F46E5;
+            --bg-main: #212121;
+            --bg-sidebar: #171717;
+            --bg-input: #2f2f2f;
+            --text-primary: #ececec;
+            --text-secondary: #b4b4b4;
+            --accent: #10a37f;
+            --accent-hover: #1a7f64;
+            --user-bubble: #2f2f2f;
+            --border-color: #383838;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .app-container {
-            display: flex;
-            width: 100%;
-            max-width: 1000px;
-            height: 85vh;
-            background-color: var(--bg-panel);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
 
-        /* --- Setup Panel (Left) --- */
-        .setup-panel {
-            width: 300px;
-            background-color: #F9FAFB;
-            border-right: 1px solid var(--border);
-            padding: 24px;
+        /* SIDEBAR (Left Panel) */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
             display: flex;
             flex-direction: column;
+            padding: 20px 15px;
+            border-right: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
         }
 
-        .setup-panel h2 {
-            font-size: 1.25rem;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .setup-panel p {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin-bottom: 24px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        input[type="url"], input[type="text"] {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.875rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="url"]:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-        }
-
-        button {
-            padding: 10px 16px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover:not(:disabled) {
-            background-color: var(--primary-hover);
-        }
-
-        button:disabled {
-            background-color: #9CA3AF;
-            cursor: not-allowed;
-        }
-
-        .status-indicator {
-            margin-top: 24px;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 0.875rem;
+        .brand {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border);
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+
+        .brand-icon {
+            background: var(--text-primary);
+            color: var(--bg-sidebar);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .setup-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .sidebar input {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .sidebar input:focus {
+            border-color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            color: var(--text-secondary);
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #9CA3AF; /* Gray default */
+            background-color: #666;
         }
-        
-        .status-dot.active { background-color: #10B981; } /* Green */
-        .status-dot.loading { background-color: #F59E0B; animation: pulse 1.5s infinite; } /* Yellow */
+        .status-dot.ready { background-color: var(--accent); }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        /* --- Chat Panel (Right) --- */
-        .chat-panel {
+        /* MAIN CHAT AREA (Right Panel) */
+        .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
-        .chat-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-header h2 {
-            font-size: 1.25rem;
-            color: var(--text-dark);
-        }
-
-        .badge {
-            background-color: #EEF2FF;
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .chat-history {
+        .chat-container {
             flex: 1;
-            padding: 24px;
             overflow-y: auto;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            align-items: center;
+            scroll-behavior: smooth;
+        }
+
+        .message-wrapper {
+            width: 100%;
+            max-width: 768px;
+            display: flex;
+            margin-bottom: 24px;
+        }
+
+        .message-wrapper.user {
+            justify-content: flex-end;
+        }
+
+        .message-wrapper.bot {
+            justify-content: flex-start;
         }
 
         .message {
-            display: flex;
-            gap: 12px;
             max-width: 80%;
+            line-height: 1.6;
+            font-size: 1rem;
+            word-wrap: break-word;
         }
 
         .message.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
+            background-color: var(--user-bubble);
+            padding: 12px 20px;
+            border-radius: 24px;
+            border-bottom-right-radius: 4px;
         }
 
-        .avatar {
-            width: 32px;
-            height: 32px;
+        .message.bot {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+        }
+
+        .bot-avatar {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
+            background-color: #10a37f;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1rem;
-            background-color: var(--border);
             flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .message.bot .avatar { background-color: #EEF2FF; }
-
-        .bubble {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            line-height: 1.5;
+        .bot-avatar svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
         }
 
-        .message.bot .bubble {
-            background-color: var(--bot-bubble);
-            color: var(--text-dark);
-            border-top-left-radius: 0;
-        }
-
-        .message.user .bubble {
-            background-color: var(--user-bubble);
-            color: white;
-            border-top-right-radius: 0;
-        }
-
-        .chat-input-area {
-            padding: 20px 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 12px;
-        }
-
-        .chat-input-area input {
+        .bot-text {
             flex: 1;
+            color: var(--text-primary);
+        }
+
+        /* INPUT AREA */
+        .input-container {
+            padding: 20px;
+            background-image: linear-gradient(180deg, rgba(33,33,33,0), #212121 40%);
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-box {
+            width: 100%;
+            max-width: 768px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-input);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-box:focus-within {
+            border-color: #555;
+        }
+
+        .input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 12px 0;
+            outline: none;
+        }
+
+        .input-box input:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .input-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            background: var(--text-primary);
+            color: var(--bg-main);
+            border: none;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .send-btn:disabled {
+            background: var(--border-color);
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .send-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* TYPING ANIMATION */
+        .thinking {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            height: 24px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
 
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <aside class="setup-panel">
-            <h2>RAG Setup</h2>
-            <p>Enter a URL to scrape and index its content for the chatbot.</p>
-            
-            <div class="input-group">
-                <label for="url-input">Target Website URL</label>
-                <input type="url" id="url-input" placeholder="https://example.com" required>
-                <button id="ingest-btn">Index Website</button>
-            </div>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">AI</div>
+            <span>Website Q&A</span>
+        </div>
 
-            <div class="status-indicator">
-                <div class="status-dot" id="status-dot"></div>
-                <span id="status-text">Awaiting URL...</span>
-            </div>
-        </aside>
+        <div class="setup-group">
+            <label for="url">Target Context</label>
+            <input type="text" id="url" placeholder="https://example.com" autocomplete="off">
+            <button class="btn-primary" id="indexBtn" onclick="setURL()">Index Website</button>
+        </div>
 
-        <main class="chat-panel">
-            <header class="chat-header">
-                <h2>Knowledge Bot</h2>
-                <span class="badge">Powered by RAG</span>
-            </header>
+        <div class="status-badge">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Awaiting Setup...</span>
+        </div>
+    </aside>
 
-            <div class="chat-history" id="chat-history">
+    <main class="main-content">
+        <div class="chat-container" id="chat">
+            <div class="message-wrapper bot">
                 <div class="message bot">
-                    <div class="avatar">🤖</div>
-                    <div class="bubble">Hello! Please index a website on the left first. Once it's ready, you can ask me anything about its content.</div>
+                    <div class="bot-avatar">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    </div>
+                    <div class="bot-text">
+                        Hello! Please enter a website URL in the sidebar to begin indexing. Once ready, you can ask me questions about it.
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Ask a question about the indexed URL..." disabled>
-                <button id="send-btn" disabled>Send</button>
+        <div class="input-container">
+            <div class="input-box">
+                <input type="text" id="question" placeholder="Message AI..." disabled autocomplete="off">
+                <button class="send-btn" id="sendBtn" onclick="ask()" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
-    <script>
-        // DOM Elements
-        const urlInput = document.getElementById('url-input');
-        const ingestBtn = document.getElementById('ingest-btn');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
-        
-        const chatHistory = document.getElementById('chat-history');
-        const chatInput = document.getElementById('chat-input');
-        const sendBtn = document.getElementById('send-btn');
+<script>
+    let currentURL = "";
+    let ready = false;
 
-        let isIndexed = false;
+    // Trigger ask() on Enter key
+    document.getElementById("question").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            ask();
+        }
+    });
 
-        // Handle URL Ingestion
-        ingestBtn.addEventListener('click', () => {
-            const url = urlInput.value.trim();
-            
-            if (!url) {
-                alert("Please enter a valid URL.");
-                return;
-            }
+    // Trigger setURL() on Enter key inside URL input
+    document.getElementById("url").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            setURL();
+        }
+    });
 
-            // Simulate the backend API call to your RAG ingestion pipeline
-            ingestBtn.disabled = true;
-            statusDot.className = 'status-dot loading';
-            statusText.textContent = `Scraping & Indexing...`;
+    function setURL() {
+        const urlInput = document.getElementById("url");
+        const url = urlInput.value.trim();
 
-            console.log(`[Frontend] Sending URL to backend: ${url}`);
-            setTimeout(() => {
-                isIndexed = true;
-                
-                // Update UI State
-                statusDot.className = 'status-dot active';
-                statusText.textContent = 'Ready to chat!';
-                ingestBtn.textContent = 'Re-index';
-                ingestBtn.disabled = false;
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                
-                addMessage('bot', `I've successfully indexed ${url}. What would you like to know about it?`);
-            }, 2000); 
-        });
-        function handleSend() {
-            if (!isIndexed) return;
-            
-            const message = chatInput.value.trim();
-            if (!message) return;
-            addMessage('user', message);
-            chatInput.value = '';
-            setTimeout(() => {
-                addMessage('bot', `Based on the provided context from the URL, here is a synthesized answer to: "${message}"`);
-            }, 1000);
+        if (!url) {
+            alert("Please enter a valid URL.");
+            urlInput.focus();
+            return;
         }
 
-        sendBtn.addEventListener('click', handleSend);
+        currentURL = url;
+        ready = true;
+
+        // Update UI Status
+        document.getElementById("statusDot").classList.add("ready");
+        document.getElementById("statusText").innerText = "Ready to chat";
+        document.getElementById("statusText").style.color = "var(--text-primary)";
         
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSend();
-        });
-        function addMessage(sender, text) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.textContent = sender === 'bot' ? '🤖' : '👤';
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.textContent = text
-            msgDiv.appendChild(avatar);
-            msgDiv.appendChild(bubble);
-            chatHistory.appendChild(msgDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
+        // Enable inputs
+        const questionInput = document.getElementById("question");
+        questionInput.disabled = false;
+        document.getElementById("sendBtn").disabled = false;
+        
+        // Visual feedback on button
+        const btn = document.getElementById("indexBtn");
+        btn.innerText = "Indexed ✅";
+        btn.style.backgroundColor = "transparent";
+        btn.style.border = "1px solid var(--border-color)";
+        
+        addBotMessage(`Website set to: ${url}. What would you like to know?`);
+        questionInput.focus();
+    }
+
+    function addUserMessage(text) {
+        const chat = document.getElementById("chat");
+        
+        const wrapper = document.createElement("div");
+        wrapper.className = "message-wrapper user";
+        
+        const msg = document.createElement("div");
+        msg.className = "message user";
+        msg.innerText = text;
+        
+        wrapper.appendChild(msg);
+        chat.appendChild(wrapper);
+        scrollToBottom();
+    }
+
+    function addBotMessage(text) {
+        const chat = document.getElementById("chat");
+        
+        const wrapper = document.createElement("div");
+        wrapper.className = "message-wrapper bot";
+        
+        wrapper.innerHTML = `
+            <div class="message bot">
+                <div class="bot-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                </div>
+                <div class="bot-text">${escapeHTML(text)}</div>
+            </div>
+        `;
+        
+        chat.appendChild(wrapper);
+        scrollToBottom();
+    }
+
+    function showThinking() {
+        const chat = document.getElementById("chat");
+        const wrapper = document.createElement("div");
+        wrapper.className = "message-wrapper bot";
+        wrapper.id = "thinking-indicator";
+        
+        wrapper.innerHTML = `
+            <div class="message bot">
+                <div class="bot-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                </div>
+                <div class="bot-text">
+                    <div class="thinking">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        chat.appendChild(wrapper);
+        scrollToBottom();
+        return wrapper;
+    }
+
+    function removeThinking() {
+        const thinking = document.getElementById("thinking-indicator");
+        if (thinking) {
+            thinking.remove();
         }
-    </script>
+    }
+
+    function scrollToBottom() {
+        const chat = document.getElementById("chat");
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Basic HTML escaping to prevent XSS if API returns raw HTML
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.innerText = str;
+        return div.innerHTML;
+    }
+
+    async function ask() {
+        if (!ready) return;
+
+        const questionInput = document.getElementById("question");
+        const question = questionInput.value.trim();
+
+        if (!question) return;
+
+        // Display user's question
+        addUserMessage(question);
+        
+        // Clear input and briefly disable
+        questionInput.value = "";
+        questionInput.disabled = true;
+        document.getElementById("sendBtn").disabled = true;
+
+        // Show animated typing indicator
+        showThinking();
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    url: currentURL,
+                    question: question
+                })
+            });
+
+            const data = await res.json();
+            
+            removeThinking();
+            addBotMessage(data.answer || "No response received from the server.");
+
+        } catch (err) {
+            removeThinking();
+            addBotMessage("⚠️ Error: Could not connect to the backend server. Make sure it is running on http://127.0.0.1:8000.");
+            console.error(err);
+        } finally {
+            // Re-enable input
+            questionInput.disabled = false;
+            document.getElementById("sendBtn").disabled = false;
+            questionInput.focus();
+        }
+    }
+</script>
+
 </body>
 </html>
