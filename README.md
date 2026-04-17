@@ -65,10 +65,10 @@ Answer
 project/
 │
 ├── backend/
-│   └── chatbot_llm2.py   # main backend
+│   └── chatbot_llm.py   # main backend
 │
 ├── frontend/
-│   └── main_ll2.html     # UI
+│   └── main.html     # UI
 │
 └── README.md
 ```
@@ -78,7 +78,7 @@ project/
 ### 🔧 1. Clone Project
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/dharun18vk/RAG-Powered-Website-Chatbot
 cd project
 ```
 
@@ -142,14 +142,14 @@ ollama run llama3
 
 ```bash
 cd backend
-python -m uvicorn chatbot_llm2:app --reload
+python -m uvicorn chatbot_llm:app --reload
 ```
 
 👉 Server runs at: http://127.0.0.1:8000
 
 ### 🌐 Open Frontend
 
-Open this file in browser: `frontend/main_ll2.html`
+Open this file in browser: `frontend/main_.html`
 
 ## 🧪 Usage
 
